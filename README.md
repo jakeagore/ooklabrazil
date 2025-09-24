@@ -1,3 +1,5 @@
+![map of brazil](img/ooklabrazil-github-header.png)
+
 ## Put Definers here:
 - What is rural vs urban?
 - When are the flood seasons?
