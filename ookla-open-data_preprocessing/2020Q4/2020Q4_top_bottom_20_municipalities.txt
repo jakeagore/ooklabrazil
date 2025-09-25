@@ -1,0 +1,42 @@
+Top and Bottom 20 Municipalities by Download Speed (tests >= 50):
+       CD_MUN              Municipality  Avg download speed (Mbps)  Tests
+697   2209104       Santa Cruz do Piauí                     224.93     91
+4841  5103452                    Denise                     204.78     98
+3896  4123204    Santa Cecília do Pavão                     185.67     96
+4890  5106422        Peixoto de Azevedo                     183.86    511
+4554  4314548            Pinto Bandeira                     181.04     55
+4357  4305306                   Chapada                     179.10     51
+625   2203909                  Floriano                     175.32     94
+5156  5220108  São Luís de Montes Belos                     174.72   1359
+5021  5207352                  Edealina                     172.36     54
+325   1716109      Paraíso do Tocantins                     168.81    647
+3553  3554904           Três Fronteiras                     166.77     71
+5022  5207402                     Edéia                     163.98    153
+2432  3141405                    Medina                     162.61     66
+535   2111508    São Mateus do Maranhão                     161.62     86
+220   1507151  São Domingos do Araguaia                     159.68     57
+2095  3109907              Caetanópolis                     159.02    253
+3408  3541703                     Quatá                     158.48    292
+2506  3148103                Patrocínio                     158.36   1726
+3139  3517307                   Guaimbê                     157.40     59
+3143  3517703                     Guará                     156.64     52
+4502  4312500                 Mostardas                       5.77    178
+3004  3505401            Barra do Turvo                       5.65     54
+3714  4109500              Guaraqueçaba                       5.63     55
+1750  2913457                 Igrapiúna                       5.27    692
+695   2208908         Ribeiro Gonçalves                       5.09     50
+1694  2908606                     Conde                       5.03     61
+2064  3107208          Bocaina de Minas                       4.55    192
+4911  5107354         São José do Xingu                       4.52     86
+4600  4316972    Santa Margarida do Sul                       4.47     52
+68    1200708                    Xapuri                       4.40     62
+3919  4125001          São João do Ivaí                       4.17    167
+630   2204352                 Geminiano                       3.97     66
+3818  4117271                Nova Tebas                       3.74    110
+1593  2807501             Tomar do Geru                       3.58     50
+137   1501808                    Breves                       3.29     53
+1977  2932408                     Uibaí                       3.11    125
+2222  3122470                 Dom Bosco                       2.94    163
+121   1500701                    Anajás                       2.42    113
+1498  2707206      Poço das Trincheiras                       2.38    102
+86    1302405                    Lábrea                       1.66     51
