@@ -1,0 +1,42 @@
+Top and Bottom 20 Municipalities by Download Speed (tests >= 50):
+       CD_MUN               Municipality  Avg download speed (Mbps)   Tests
+497   2102754          Capinzal do Norte                     345.84     309
+3810  3549953      São Lourenço da Serra                     340.03    1690
+5177  5101258                 Araputanga                     321.50     189
+2951  3161908  São Gonçalo do Rio Abaixo                     320.49     825
+98    1301654                    Guajará                     318.30     119
+3956  4104253                Campo Magro                     313.86    1283
+460   2100709                  Anajatuba                     289.74     223
+4151  4118451               Pato Bragado                     289.57     142
+4005  4107652         Fazenda Rio Grande                     281.87    5816
+3151  3204955         São Roque do Canaã                     277.36     360
+298   1600204                   Calçoene                     276.78     318
+614   2110203                 Santa Rita                     273.71     338
+3458  3518107                   Guarantã                     267.45     115
+4330  4202305                    Biguaçu                     266.89    4310
+496   2102705                 Cantanhede                     266.52     296
+214   1504059                 Mãe do Rio                     264.60    1366
+207   1503507                    Irituia                     264.31     905
+3315  3505500                   Barretos                     264.01    6760
+5326  5201405       Aparecida de Goiânia                     263.93   30828
+5402  5208707                    Goiânia                     262.26  113649
+5471  5214903                  Nova Roma                      15.55      62
+1954  2911659                    Guajeru                      15.50     225
+5466  5214705               Nova América                      15.37      87
+706   2202109          Campinas do Piauí                      15.22      69
+65    1200393               Porto Walter                      14.56      90
+403   1716307                 Pau D'Arco                      14.40      53
+5489  5216908             Pilar de Goiás                      13.65     254
+2194  2930907     Tabocas do Brejo Velho                      13.61     130
+1595  2612554             Santa Filomena                      12.93     385
+2480  3122470                  Dom Bosco                      12.56     173
+5386  5207105                    Diorama                      12.53     102
+2911  3158508        Santana de Pirapama                      11.18     144
+5065  4322525                 Vale Verde                       9.90      53
+4927  4315321                   Quevedos                       9.82      96
+2017  2917334                       Iuiu                       9.71     190
+716   2202539          Caraúbas do Piauí                       8.58      86
+4802  4310579                    Itapuca                       5.41      52
+2799  3148806              Pedra do Anta                       5.15      70
+696   2201919     Bom Princípio do Piauí                       4.97      52
+187   1502509                     Chaves                       3.75      97

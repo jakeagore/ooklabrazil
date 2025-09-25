@@ -1,0 +1,12 @@
+Top and Bottom 5 States by Download Speed (tests >= 50):
+   CD_UF             State  Avg download speed (Mbps)    Tests
+26    53  Distrito Federal                     257.65   220568
+19    35         São Paulo                     209.53  2488150
+25    52             Goiás                     209.09   355501
+1     12              Acre                     208.56    25532
+21    42    Santa Catarina                     199.71   380992
+3     14           Roraima                     147.46    17250
+12    26        Pernambuco                     144.37   378372
+11    25           Paraíba                     143.18   135969
+15    29             Bahia                     141.61   658712
+13    27           Alagoas                     140.25   104586
