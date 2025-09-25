@@ -33,20 +33,12 @@ def get_tile_url(service_type: str, year: int, q: int) -> str:
     url = f"{base_url}/type%3D{service_type}/year%3D{dt:%Y}/quarter%3D{q}/{dt:%Y-%m-%d}_performance_{service_type}_tiles.zip"
     return url
 
-<<<<<<< Updated upstream
 tile_url = get_tile_url("fixed", 2020, 2)
-=======
-tile_url = get_tile_url("fixed", 2024, 4)
->>>>>>> Stashed changes
 print(tile_url)
 
 # Load tiles
 # Download from: generated ookla-open-data URL
-<<<<<<< Updated upstream
 tile_shapefile_path = "C:/Users/jakea/OneDrive/Documentos/capstone/spyder_working_dir/2020-04-01_performance_fixed_tiles/gps_fixed_tiles.shp"
-=======
-tile_shapefile_path = "C:/Users/jakea/OneDrive/Documentos/capstone/spyder_working_dir/2024-10-01_performance_fixed_tiles/gps_fixed_tiles.shp" # make sure year and quarter are intended ones
->>>>>>> Stashed changes
 tiles = gp.read_file(tile_shapefile_path)
 # print(tiles.head())
 
@@ -211,8 +203,4 @@ if not br_capitals.empty:
         arrowprops=dict(arrowstyle="-|>", color="black", lw=0.3, shrinkA=30, shrinkB=30)
     )
 plt.tight_layout()
-<<<<<<< Updated upstream
 plt.show()
-=======
-plt.show()
->>>>>>> Stashed changes
