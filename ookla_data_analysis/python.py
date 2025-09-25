@@ -37,17 +37,20 @@ tile_url = get_tile_url("fixed", 2020, 2)
 print(tile_url)
 
 # Load tiles
+# Download from: generated ookla-open-data URL
 tile_shapefile_path = "C:/Users/jakea/OneDrive/Documentos/capstone/spyder_working_dir/2020-04-01_performance_fixed_tiles/gps_fixed_tiles.shp"
 tiles = gp.read_file(tile_shapefile_path)
 # print(tiles.head())
 
 # Load Brazilian states
+# Download from: https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2024/Brasil/BR_UF_2024.zip
 state_shapefile_path = "C:/Users/jakea/OneDrive/Documentos/capstone/spyder_working_dir/BR_UF_2024/BR_UF_2024.shp"
 br_states = gp.read_file(state_shapefile_path)
 br_states = br_states.to_crs(4326)
 # print("State columns:", br_states.columns.tolist()) # for troubleshooting
 
 # Load Brazilian municipalities
+# Download from: https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2024/Brasil/BR_Municipios_2024.zip
 municipality_shapefile_path = "C:/Users/jakea/OneDrive/Documentos/capstone/spyder_working_dir/BR_Municipios_2024/BR_Municipios_2024.shp"
 br_municipalities = gp.read_file(municipality_shapefile_path)
 br_municipalities = br_municipalities.to_crs(4326)
