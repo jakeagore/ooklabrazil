@@ -129,6 +129,10 @@ mun_table_stats = mun_table_stats.rename(columns=dict(zip(mun_table_stats.column
 print("Top and Bottom 20 Municipalities by Download Speed (tests >= 50):")
 print(mun_table_stats)
 
+# Calculate and print the overall average download speed for the quarter
+overall_avg_download = np.average(tiles_in_br_municipalities["avg_d_mbps"], weights=tiles_in_br_municipalities["tests"])
+print(f"\nOverall Average Download Speed: {overall_avg_download:.2f} Mbps")
+
 # Mapping
 # Common plotting setup
 labels = ["0 to 25 Mbps", "25 to 50 Mbps", "50 to 100 Mbps", "100 to 150 Mbps", "150+ Mbps"]
