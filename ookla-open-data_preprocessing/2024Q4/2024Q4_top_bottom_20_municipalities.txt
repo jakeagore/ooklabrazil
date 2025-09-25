@@ -1,0 +1,42 @@
+Top and Bottom 20 Municipalities by Download Speed (tests >= 50):
+       CD_MUN               Municipality  Avg download speed (Mbps)  Tests
+3958  4104253                Campo Magro                     436.61   1249
+2376  3113206                   Carandaí                     422.11   1047
+4985  4318481      São José do Hortêncio                     366.37    101
+3317  3505500                   Barretos                     363.41   4955
+98    1301654                    Guajará                     352.67     64
+4231  4124053  Santa Terezinha de Itaipu                     345.02   1707
+3751  3544301                    Roseira                     341.66     93
+4333  4202305                    Biguaçu                     331.35   3426
+3778  3546900                Santa Lúcia                     331.22     63
+4924  4315149          Presidente Lucena                     326.60     84
+449   2100055                 Açailândia                     323.56   4165
+3453  3517406                     Guaíra                     320.36   1241
+57    1200203            Cruzeiro do Sul                     320.06   1434
+3288  3503000                    Aramina                     319.70    138
+4496  4213153            Planalto Alegre                     313.62     89
+4007  4107652         Fazenda Rio Grande                     311.20   4893
+3694  3539400                Piratininga                     309.29    495
+2947  3161403    São Francisco do Glória                     307.62     62
+3470  3519006                Herculândia                     307.45     79
+119   1303403                  Parintins                     307.04   1368
+4927  4315206                    Putinga                      24.31    218
+2021  2917334                       Iuiu                      24.21    134
+106   1302207                      Juruá                      24.11     56
+4734  4306759             Doutor Ricardo                      24.09     94
+4686  4304853               Carlos Gomes                      23.99    126
+4818  4311130                       Jari                      23.93    105
+2646  3136520    José Gonçalves de Minas                      22.76     70
+5469  5214705               Nova América                      22.62    249
+131   1304203                       Tefé                      22.27   2390
+4599  4300307                    Alecrim                      22.19     85
+113   1302801                      Maraã                      21.55    256
+2324  3108503                  Botumirim                      20.90     74
+4763  4308300            Fontoura Xavier                      20.90    269
+2935  3160454    Santo Antônio do Retiro                      20.83    140
+2303  3106606                 Bertópolis                      20.77    413
+4691  4305116                 Centenário                      20.33    118
+103   1301951                  Itamarati                      20.17    172
+2113  2924207            Pedro Alexandre                      19.95     50
+406   1716653                 Pequizeiro                      19.76    342
+4960  4317004       Santana da Boa Vista                      10.45     86
