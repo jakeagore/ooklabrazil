@@ -33,12 +33,12 @@ def get_tile_url(service_type: str, year: int, q: int) -> str:
     url = f"{base_url}/type%3D{service_type}/year%3D{dt:%Y}/quarter%3D{q}/{dt:%Y-%m-%d}_performance_{service_type}_tiles.zip"
     return url
 
-tile_url = get_tile_url("fixed", 2020, 4)
+tile_url = get_tile_url("fixed", 2024, 2)
 print(tile_url)
 
 # Load tiles
 # Download from: generated ookla-open-data URL
-tile_shapefile_path = "C:/Users/jakea/OneDrive/Documentos/capstone/spyder_working_dir/2020-10-01_performance_fixed_tiles/gps_fixed_tiles.shp"
+tile_shapefile_path = "C:/Users/jakea/OneDrive/Documentos/capstone/spyder_working_dir/2024-04-01_performance_fixed_tiles/gps_fixed_tiles.shp"
 tiles = gp.read_file(tile_shapefile_path)
 # print(tiles.head())
 
