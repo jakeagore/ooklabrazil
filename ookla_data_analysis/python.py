@@ -17,8 +17,8 @@ from shapely.geometry import Point
 from adjustText import adjust_text
 
 # Troubleshooting
-print(os.getcwd())
-print(os.path.exists("filename"))
+print(os.getcwd()) # Get current working directory
+print(os.path.exists("filename")) # Check if a path exists. Returns T/F
 
 # Ookla URL generator
 def quarter_start(year: int, q: int) -> datetime:
@@ -47,14 +47,14 @@ tiles = gp.read_file(tile_shapefile_path)
 state_shapefile_path = "C:/Users/jakea/OneDrive/Documentos/capstone/spyder_working_dir/BR_UF_2024/BR_UF_2024.shp"
 br_states = gp.read_file(state_shapefile_path)
 br_states = br_states.to_crs(4326)
-# print("State columns:", br_states.columns.tolist()) # for troubleshooting
+# print("State columns:", br_states.columns.tolist()) # For troubleshooting. Check fields like 'CD_UF' and 'NM_UF'
 
 # Load Brazilian municipalities
 # Download from: https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2024/Brasil/BR_Municipios_2024.zip
 municipality_shapefile_path = "C:/Users/jakea/OneDrive/Documentos/capstone/spyder_working_dir/BR_Municipios_2024/BR_Municipios_2024.shp"
 br_municipalities = gp.read_file(municipality_shapefile_path)
 br_municipalities = br_municipalities.to_crs(4326)
-# print("Municipality columns:", br_municipalities.columns.tolist()) # for troubleshooting
+# print("Municipality columns:", br_municipalities.columns.tolist()) # For troubleshooting. Check fields like 'CD_MUN' and 'NM_MUN'
 
 # Define field names
 STATE_ID_FIELD = 'CD_UF'
