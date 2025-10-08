@@ -72,6 +72,11 @@ STATE_NAME_FIELD = 'NM_UF'
 MUN_ID_FIELD = 'CD_MUN'
 MUN_NAME_FIELD = 'NM_MUN'
 
+# Ensure spatial indices are built (may be redundent, GeoPandas uses spatial indices already, but explicitly building them could improve runtime)
+tiles_filtered.sindex
+br_states.sindex
+br_municipalities.sindex
+
 # Spatial join and convert speeds for states
 tiles_in_br_states = gp.sjoin(tiles_filtered, br_states, how="inner", predicate='intersects')
 tiles_in_br_states['avg_d_mbps'] = tiles_in_br_states['avg_d_kbps'] / 1000
