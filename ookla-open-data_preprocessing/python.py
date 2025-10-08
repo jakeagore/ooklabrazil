@@ -42,6 +42,16 @@ tile_shapefile_path = "C:/Users/jakea/OneDrive/Documentos/capstone/spyder_workin
 tiles = gp.read_file(tile_shapefile_path)
 # print(tiles.head())
 
+# Filter tiles by Brazil's bounding box
+min_lon, max_lon = -74, -34
+min_lat, max_lat = -34, 5
+tiles['centroid'] = tiles.geometry.centroid
+tiles_filtered = tiles[
+    (tiles['centroid'].x >= min_lon) & (tiles['centroid'].x <= max_lon) &
+    (tiles['centroid'].y >= min_lat) & (tiles['centroid'].y <= max_lat)
+].copy()
+tiles_filtered = tiles_filtered.drop(columns=['centroid'])
+
 # Load Brazilian states
 # Download from: https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2024/Brasil/BR_UF_2024.zip
 state_shapefile_path = "C:/Users/jakea/OneDrive/Documentos/capstone/spyder_working_dir/BR_UF_2024/BR_UF_2024.shp"
@@ -63,13 +73,13 @@ MUN_ID_FIELD = 'CD_MUN'
 MUN_NAME_FIELD = 'NM_MUN'
 
 # Spatial join and convert speeds for states
-tiles_in_br_states = gp.sjoin(tiles, br_states, how="inner", predicate='intersects')
+tiles_in_br_states = gp.sjoin(tiles_filtered, br_states, how="inner", predicate='intersects')
 tiles_in_br_states['avg_d_mbps'] = tiles_in_br_states['avg_d_kbps'] / 1000
 tiles_in_br_states['avg_u_mbps'] = tiles_in_br_states['avg_u_kbps'] / 1000
 # print(tiles_in_br_states.head())
 
 # Spatial join and convert speeds for municipalities
-tiles_in_br_municipalities = gp.sjoin(tiles, br_municipalities, how="inner", predicate='intersects')
+tiles_in_br_municipalities = gp.sjoin(tiles_filtered, br_municipalities, how="inner", predicate='intersects')
 tiles_in_br_municipalities['avg_d_mbps'] = tiles_in_br_municipalities['avg_d_kbps'] / 1000
 tiles_in_br_municipalities['avg_u_mbps'] = tiles_in_br_municipalities['avg_u_kbps'] / 1000
 # print(tiles_in_br_municipalities.head())
