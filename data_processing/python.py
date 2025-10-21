@@ -10,16 +10,12 @@ Created on Wed Sep 24 06:56:37 2025
 # - select desired metric, download speed, upload speed, and/or latency
 # - select states and/or municipalities
 
-import requests
-from io import BytesIO
-import zipfile
 from datetime import datetime
 import geopandas as gp
 import pandas as pd
 import numpy as np
 import os
 from shapely.geometry import box
-from tqdm import tqdm
 
 # ------------------------------------ #
 # --- Load Ookla Performance Tiles --- #
@@ -164,7 +160,7 @@ state_mapping = dict(zip(state_stats['CD_UF'], state_stats['NM_UF']))
 municipality_stats['NM_UF'] = municipality_stats['CD_MUN'].astype(str).str[:2].map(state_mapping)
 
 # Export States with All metrics
-state_export = state_stats_full[[
+state_export = state_stats[[
     'CD_UF', 'NM_UF', 'service_type', 'year', 'quarter',
     'avg_d_mbps_wt', 'avg_u_mbps_wt',
     'avg_lat_ms_wt',
@@ -177,10 +173,10 @@ state_export.columns = [
     'avg_lat_ms',
     'tests'
 ]
-state_export.to_csv(os.path.join(downloads_path, f'brazil_state_connectivity_{specified_year}.csv'), index=False)
+state_export.to_csv(os.path.join(downloads_path, f'brazil_state_connectivity_{year}.csv'), index=False)
 
 # Export Municipalities with All metrics
-mun_export = municipality_stats_full[[
+mun_export = municipality_stats[[
     'CD_MUN', 'NM_MUN', 'NM_UF', 'service_type', 'year', 'quarter',
     'avg_d_mbps_wt', 'avg_u_mbps_wt',
     'avg_lat_ms_wt',
@@ -193,4 +189,4 @@ mun_export.columns = [
     'avg_lat_ms',
     'tests'
 ]
-mun_export.to_csv(os.path.join(downloads_path, f'brazil_municipality_connectivity_{specified_year}.csv'), index=False)
+mun_export.to_csv(os.path.join(downloads_path, f'brazil_municipality_connectivity_{year}.csv'), index=False)
