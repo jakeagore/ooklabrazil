@@ -10,12 +10,16 @@ Created on Wed Sep 24 06:56:37 2025
 # - select desired metric, download speed, upload speed, and/or latency
 # - select states and/or municipalities
 
+import requests
+from io import BytesIO
+import zipfile
 from datetime import datetime
 import geopandas as gp
 import pandas as pd
 import numpy as np
 import os
 from shapely.geometry import box
+from tqdm import tqdm
 
 # ------------------------------------ #
 # --- Load Ookla Performance Tiles --- #
@@ -34,12 +38,18 @@ def get_tile_url(service_type: str, year: int, q: int) -> str:
     return url
 
 # service type: "mobile" or "fixed", year, quarter
-tile_url = get_tile_url("fixed", 2024, 4)
+# Modify these for desired period
+service_type = "fixed"
+year = 2019
+quarter = 1
+
+# Print URL for downloading
+tile_url = get_tile_url(service_type, year, quarter)
 print(tile_url)
 
 # Load tiles
 # Download from: generated ookla-open-data URL
-tile_shapefile_path = "C:/Users/jakea/OneDrive/Documentos/capstone/spyder_working_dir/2024-10-01_performance_fixed_tiles/gps_fixed_tiles.shp"
+tile_shapefile_path = "D:\\2024-10-01_performance_fixed_tiles\\gps_fixed_tiles.shp"
 tiles = gp.read_file(tile_shapefile_path)
 
 # Pre-Processing: Filter tiles by Brazil's bounding box
@@ -55,15 +65,13 @@ tiles_filtered = tiles[tiles.geometry.intersects(brazil_bbox)].copy()
 # --------------------------------- #
 # Load Brazilian States
 # Download from: https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2024/Brasil/BR_UF_2024.zip
-state_shapefile_path = "C:/Users/jakea/OneDrive/Documentos/capstone/spyder_working_dir/BR_UF_2024/BR_UF_2024.shp"
-br_states = gp.read_file(state_shapefile_path)
-br_states = br_states.to_crs(4326)
+state_shapefile_path = "D:\\BR_UF_2024\\BR_UF_2024.shp"
+br_states = gp.read_file(state_shapefile_path).to_crs(4326)
 
 # Load Brazilian Municipalities
 # Download from: https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2024/Brasil/BR_Municipios_2024.zip
-municipality_shapefile_path = "C:/Users/jakea/OneDrive/Documentos/capstone/spyder_working_dir/BR_Municipios_2024/BR_Municipios_2024.shp"
-br_municipalities = gp.read_file(municipality_shapefile_path)
-br_municipalities = br_municipalities.to_crs(4326)
+municipality_shapefile_path = "D:\\BR_Municipios_2024\\BR_Municipios_2024.shp"
+br_municipalities = gp.read_file(municipality_shapefile_path).to_crs(4326)
 
 # Define field names
 STATE_ID_FIELD = 'CD_UF'
@@ -156,33 +164,33 @@ state_mapping = dict(zip(state_stats['CD_UF'], state_stats['NM_UF']))
 municipality_stats['NM_UF'] = municipality_stats['CD_MUN'].astype(str).str[:2].map(state_mapping)
 
 # Export States with All metrics
-state_export = state_stats[[
-    'CD_UF', 'NM_UF', 
+state_export = state_stats_full[[
+    'CD_UF', 'NM_UF', 'service_type', 'year', 'quarter',
     'avg_d_mbps_wt', 'avg_u_mbps_wt',
     'avg_lat_ms_wt',
     'tests'
 ]].copy()
 
 state_export.columns = [
-    'State_Code', 'State_Name',
-    'Avg_Download_Mbps', 'Avg_Upload_Mbps',
-    'Avg_Latency_ms',
-    'Total_Tests'
+    'state_code', 'state_name', 'service_type', 'year', 'quarter',
+    'avg_d_Mbps', 'avg_u_Mbps',
+    'avg_lat_ms',
+    'tests'
 ]
-state_export.to_csv(os.path.join(downloads_path, 'Brazil_State_Connectivity_Full.csv'), index=False)
+state_export.to_csv(os.path.join(downloads_path, f'brazil_state_connectivity_{specified_year}.csv'), index=False)
 
 # Export Municipalities with All metrics
-mun_export = municipality_stats[[
-    'CD_MUN', 'NM_MUN', 'NM_UF',
+mun_export = municipality_stats_full[[
+    'CD_MUN', 'NM_MUN', 'NM_UF', 'service_type', 'year', 'quarter',
     'avg_d_mbps_wt', 'avg_u_mbps_wt',
     'avg_lat_ms_wt',
     'tests'
 ]].copy()
 
 mun_export.columns = [
-    'Municipality_Code', 'Municipality_Name', 'State_Name',
-    'Avg_Download_Mbps', 'Avg_Upload_Mbps',
-    'Avg_Latency_ms',
-    'Total_Tests'
+    'municipality_code', 'municipality_name', 'state_name', 'service_type', 'year', 'quarter',
+    'avg_d_Mbps', 'avg_u_Mbps',
+    'avg_lat_ms',
+    'tests'
 ]
-mun_export.to_csv(os.path.join(downloads_path, 'Brazil_Municipality_Connectivity_Full.csv'), index=False)
+mun_export.to_csv(os.path.join(downloads_path, f'brazil_municipality_connectivity_{specified_year}.csv'), index=False)
