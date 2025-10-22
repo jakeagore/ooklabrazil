@@ -34,7 +34,7 @@ def get_tile_url(service_type: str, year: int, q: int) -> str:
     return url
 
 # service type: "mobile" or "fixed", year, quarter
-# Modify these for desired period
+# Modify these for desired service type and time period
 service_type = "fixed"
 year = 2019
 quarter = 1
@@ -45,7 +45,8 @@ print(tile_url)
 
 # Load tiles
 # Download from: generated ookla-open-data URL
-tile_shapefile_path = "D:\\2024-10-01_performance_fixed_tiles\\gps_fixed_tiles.shp"
+dt = quarter_start(year, quarter)
+tile_shapefile_path = f"D:\\{dt:%Y-%m-%d}_performance_{service_type}_tiles\\gps_{service_type}_tiles.shp"
 tiles = gp.read_file(tile_shapefile_path)
 
 # Pre-Processing: Filter tiles by Brazil's bounding box
