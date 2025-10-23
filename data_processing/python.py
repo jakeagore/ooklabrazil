@@ -5,11 +5,6 @@ Created on Wed Sep 24 06:56:37 2025
 @author: jakea
 """
 
-# TODO Optimization Ideas:
-# - select which year and quarter from Tableau board
-# - select desired metric, download speed, upload speed, and/or latency
-# - select states and/or municipalities
-
 from datetime import datetime
 import geopandas as gp
 import pandas as pd
@@ -35,27 +30,19 @@ def get_tile_url(service_type: str, year: int, q: int) -> str:
 
 # service type: "mobile" or "fixed", year, quarter
 # Modify these for desired service type and time period
-service_type = "fixed"
-year = 2019
-quarter = 1
+# Uncomment for downloading ookla tile folders
+# service_type = "fixed"
+# year = 2019
+# quarter = 1
 
 # Print URL for downloading
-tile_url = get_tile_url(service_type, year, quarter)
-print(tile_url)
-
-# Load tiles
-# Download from: generated ookla-open-data URL
-dt = quarter_start(year, quarter)
-tile_shapefile_path = f"D:\\{dt:%Y-%m-%d}_performance_{service_type}_tiles\\gps_{service_type}_tiles.shp"
-tiles = gp.read_file(tile_shapefile_path)
+# tile_url = get_tile_url(service_type, year, quarter)
+# print(tile_url)
 
 # Pre-Processing: Filter tiles by Brazil's bounding box
 min_lon, max_lon = -74, -34
 min_lat, max_lat = -34, 5
-# Create Brazil bounding box polygon
 brazil_bbox = box(min_lon, min_lat, max_lon, max_lat)
-# Filter
-tiles_filtered = tiles[tiles.geometry.intersects(brazil_bbox)].copy()
 
 # --------------------------------- #
 # --- Load Brazilian Shapefiles --- #
@@ -77,78 +64,110 @@ MUN_ID_FIELD = 'CD_MUN'
 MUN_NAME_FIELD = 'NM_MUN'
 
 # Ensure spatial indices are built (may be redundent, GeoPandas uses spatial indices already, but explicitly building them could improve runtime)
-tiles_filtered.sindex
 br_states.sindex
 br_municipalities.sindex
 
-# --------------------- #
-# --- Spatial Joins --- #
-# --------------------- #
-# Metrics: 
-# - avg download speed
-# - avg upload speed
-# - average latency: Use Case: Overall network quality
+# Lists to collect stats
+all_state_stats = []
+all_municipality_stats = []
 
-# TODO avg_lat_up_ms & avg_lat_down_ms parquet only, causing problems, resolve later
-# - average latency under load of all tests performed in the tile as measured during the download phase of the test: Use Case: Streaming, web browsing
-# - average latency under load of all tests performed in the tile as measured during the upload phase of the test: Use Case: Video calls, uploads
+# Loop over service types and quarters
+service_types = ["fixed", "mobile"]
+quarters = [1, 2, 3, 4]
+year = 2020 # Modify this for desired year
 
-# States
-tiles_in_br_states = gp.sjoin(tiles_filtered, br_states, how="inner", predicate='intersects')
+for service_type in service_types:
+    for quarter in quarters:
+        
+        # Load tiles
+        dt = quarter_start(year, quarter)
+        tile_shapefile_path = f"D:\\{dt:%Y-%m-%d}_performance_{service_type}_tiles\\gps_{service_type}_tiles.shp"
+        tiles = gp.read_file(tile_shapefile_path)
+        
+        # Filter tiles
+        tiles_filtered = tiles[tiles.geometry.intersects(brazil_bbox)].copy()
+        tiles_filtered.sindex
 
-tiles_in_br_states['avg_d_mbps'] = tiles_in_br_states['avg_d_kbps'] / 1000 # converted kbps -> mbps
-tiles_in_br_states['avg_u_mbps'] = tiles_in_br_states['avg_u_kbps'] / 1000
-tiles_in_br_states['avg_lat_ms'] = tiles_in_br_states['avg_lat_ms']
+        # --------------------- #
+        # --- Spatial Joins --- #
+        # --------------------- #
+        # Metrics: 
+        # - avg download speed
+        # - avg upload speed
+        # - average latency: Use Case: Overall network quality
+        
+        # TODO avg_lat_up_ms & avg_lat_down_ms parquet only, causing problems, resolve later
+        # - average latency under load of all tests performed in the tile as measured during the download phase of the test: Use Case: Streaming, web browsing
+        # - average latency under load of all tests performed in the tile as measured during the upload phase of the test: Use Case: Video calls, uploads
+        
+        # States
+        tiles_in_br_states = gp.sjoin(tiles_filtered, br_states, how="inner", predicate='intersects')
+        
+        tiles_in_br_states['avg_d_mbps'] = tiles_in_br_states['avg_d_kbps'] / 1000 # converted kbps -> mbps
+        tiles_in_br_states['avg_u_mbps'] = tiles_in_br_states['avg_u_kbps'] / 1000
+        tiles_in_br_states['avg_lat_ms'] = tiles_in_br_states['avg_lat_ms']
+        
+        # Municipalities
+        tiles_in_br_municipalities = gp.sjoin(tiles_filtered, br_municipalities, how="inner", predicate='intersects')
+        
+        tiles_in_br_municipalities['avg_d_mbps'] = tiles_in_br_municipalities['avg_d_kbps'] / 1000
+        tiles_in_br_municipalities['avg_u_mbps'] = tiles_in_br_municipalities['avg_u_kbps'] / 1000
+        tiles_in_br_municipalities['avg_lat_ms'] = tiles_in_br_municipalities['avg_lat_ms']
+        
+        # ---------------------------------------------------- #
+        # --- Aggregate All Metrics with Weighted Averages --- #
+        # ---------------------------------------------------- #
+        # States
+        state_stats = (
+            tiles_in_br_states.groupby([STATE_ID_FIELD, STATE_NAME_FIELD])
+            .apply(
+                lambda x: pd.Series({
+                    # Speeds
+                    "avg_d_mbps_wt": np.average(x["avg_d_mbps"], weights=x["tests"]),
+                    "avg_u_mbps_wt": np.average(x["avg_u_mbps"], weights=x["tests"]),
+                    # Latency
+                    "avg_lat_ms_wt": np.average(x["avg_lat_ms"], weights=x["tests"]),
+                }),
+                include_groups=False
+            )
+            .reset_index()
+            .merge(
+                tiles_in_br_states.groupby([STATE_ID_FIELD, STATE_NAME_FIELD]).agg(tests=("tests", "sum")).reset_index(),
+                on=[STATE_ID_FIELD, STATE_NAME_FIELD],
+            )
+        )
+        state_stats['service_type'] = service_type
+        state_stats['year'] = year
+        state_stats['quarter'] = quarter
+        all_state_stats.append(state_stats)
+        
+        # Municipalities
+        municipality_stats = (
+            tiles_in_br_municipalities.groupby([MUN_ID_FIELD, MUN_NAME_FIELD])
+            .apply(
+                lambda x: pd.Series({
+                    # Speeds
+                    "avg_d_mbps_wt": np.average(x["avg_d_mbps"], weights=x["tests"]),
+                    "avg_u_mbps_wt": np.average(x["avg_u_mbps"], weights=x["tests"]),
+                    # Latency
+                    "avg_lat_ms_wt": np.average(x["avg_lat_ms"], weights=x["tests"]),
+                }),
+                include_groups=False
+            )
+            .reset_index()
+            .merge(
+                tiles_in_br_municipalities.groupby([MUN_ID_FIELD, MUN_NAME_FIELD]).agg(tests=("tests", "sum")).reset_index(),
+                on=[MUN_ID_FIELD, MUN_NAME_FIELD],
+            )
+        )
+        municipality_stats['service_type'] = service_type
+        municipality_stats['year'] = year
+        municipality_stats['quarter'] = quarter
+        all_municipality_stats.append(municipality_stats)
 
-# Municipalities
-tiles_in_br_municipalities = gp.sjoin(tiles_filtered, br_municipalities, how="inner", predicate='intersects')
-
-tiles_in_br_municipalities['avg_d_mbps'] = tiles_in_br_municipalities['avg_d_kbps'] / 1000
-tiles_in_br_municipalities['avg_u_mbps'] = tiles_in_br_municipalities['avg_u_kbps'] / 1000
-tiles_in_br_municipalities['avg_lat_ms'] = tiles_in_br_municipalities['avg_lat_ms']
-
-# ---------------------------------------------------- #
-# --- Aggregate All Metrics with Weighted Averages --- #
-# ---------------------------------------------------- #
-# States
-state_stats = (
-    tiles_in_br_states.groupby([STATE_ID_FIELD, STATE_NAME_FIELD])
-    .apply(
-        lambda x: pd.Series({
-            # Speeds
-            "avg_d_mbps_wt": np.average(x["avg_d_mbps"], weights=x["tests"]),
-            "avg_u_mbps_wt": np.average(x["avg_u_mbps"], weights=x["tests"]),
-            # Latency
-            "avg_lat_ms_wt": np.average(x["avg_lat_ms"], weights=x["tests"]),
-        }),
-        include_groups=False
-    )
-    .reset_index()
-    .merge(
-        tiles_in_br_states.groupby([STATE_ID_FIELD, STATE_NAME_FIELD]).agg(tests=("tests", "sum")).reset_index(),
-        on=[STATE_ID_FIELD, STATE_NAME_FIELD],
-    )
-)
-
-# Municipalities
-municipality_stats = (
-    tiles_in_br_municipalities.groupby([MUN_ID_FIELD, MUN_NAME_FIELD])
-    .apply(
-        lambda x: pd.Series({
-            # Speeds
-            "avg_d_mbps_wt": np.average(x["avg_d_mbps"], weights=x["tests"]),
-            "avg_u_mbps_wt": np.average(x["avg_u_mbps"], weights=x["tests"]),
-            # Latency
-            "avg_lat_ms_wt": np.average(x["avg_lat_ms"], weights=x["tests"]),
-        }),
-        include_groups=False
-    )
-    .reset_index()
-    .merge(
-        tiles_in_br_municipalities.groupby([MUN_ID_FIELD, MUN_NAME_FIELD]).agg(tests=("tests", "sum")).reset_index(),
-        on=[MUN_ID_FIELD, MUN_NAME_FIELD],
-    )
-)
+# Concatenate all stats
+all_state_df = pd.concat(all_state_stats, ignore_index=True) if all_state_stats else pd.DataFrame()
+all_municipality_df = pd.concat(all_municipality_stats, ignore_index=True) if all_municipality_stats else pd.DataFrame()
 
 # -------------------------- #
 # --- EXPORT FOR TABLEAU --- #
@@ -156,38 +175,28 @@ municipality_stats = (
 # Set directory where the csv files will go; Change to your prefered location
 downloads_path = r"C:\Users\jakea\Downloads"
 
-# Add state names to municipality data for better geocoding
-state_mapping = dict(zip(state_stats['CD_UF'], state_stats['NM_UF']))
-municipality_stats['NM_UF'] = municipality_stats['CD_MUN'].astype(str).str[:2].map(state_mapping)
-
-# Export States with All metrics
-state_export = state_stats[[
+# Export States
+state_export = all_state_df[[
     'CD_UF', 'NM_UF', 'service_type', 'year', 'quarter',
-    'avg_d_mbps_wt', 'avg_u_mbps_wt',
-    'avg_lat_ms_wt',
-    'tests'
+    'avg_d_mbps_wt', 'avg_u_mbps_wt', 'avg_lat_ms_wt', 'tests'
 ]].copy()
-
 state_export.columns = [
     'state_code', 'state_name', 'service_type', 'year', 'quarter',
-    'avg_d_Mbps', 'avg_u_Mbps',
-    'avg_lat_ms',
-    'tests'
+    'avg_d_Mbps', 'avg_u_Mbps', 'avg_lat_ms', 'tests'
 ]
 state_export.to_csv(os.path.join(downloads_path, f'brazil_state_connectivity_{year}.csv'), index=False)
 
-# Export Municipalities with All metrics
-mun_export = municipality_stats[[
-    'CD_MUN', 'NM_MUN', 'NM_UF', 'service_type', 'year', 'quarter',
-    'avg_d_mbps_wt', 'avg_u_mbps_wt',
-    'avg_lat_ms_wt',
-    'tests'
-]].copy()
+# Add state names to municipality data
+state_mapping = dict(zip(br_states['CD_UF'], br_states['NM_UF']))
+all_municipality_df['NM_UF'] = all_municipality_df['CD_MUN'].astype(str).str[:2].map(state_mapping)
 
+# Export Municipalities
+mun_export = all_municipality_df[[
+    'CD_MUN', 'NM_MUN', 'NM_UF', 'service_type', 'year', 'quarter',
+    'avg_d_mbps_wt', 'avg_u_mbps_wt', 'avg_lat_ms_wt', 'tests'
+]].copy()
 mun_export.columns = [
     'municipality_code', 'municipality_name', 'state_name', 'service_type', 'year', 'quarter',
-    'avg_d_Mbps', 'avg_u_Mbps',
-    'avg_lat_ms',
-    'tests'
+    'avg_d_Mbps', 'avg_u_Mbps', 'avg_lat_ms', 'tests'
 ]
 mun_export.to_csv(os.path.join(downloads_path, f'brazil_municipality_connectivity_{year}.csv'), index=False)
