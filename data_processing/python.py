@@ -32,7 +32,7 @@ def get_tile_url(service_type: str, year: int, q: int) -> str:
 # Modify these for desired service type and time period
 # Uncomment for downloading ookla tile folders
 # service_type = "fixed"
-# year = 2019
+# year = 2024
 # quarter = 1
 
 # Print URL for downloading
@@ -74,7 +74,7 @@ all_municipality_stats = []
 # Loop over service types and quarters
 service_types = ["fixed", "mobile"]
 quarters = [1, 2, 3, 4]
-year = 2020 # Modify this for desired year
+year = 2024 # Modify this for desired year
 
 for service_type in service_types:
     for quarter in quarters:
