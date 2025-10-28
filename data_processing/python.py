@@ -60,7 +60,6 @@ MUN_NAME_FIELD = 'NM_MUN'
 # ------------------------------------------------- #
 # --- Join Ookla Tiles and Brazilian Shapefiles --- #
 # ------------------------------------------------- #
-
 # Pre-Processing: Filter tiles by Brazil's bounding box
 min_lon, max_lon = -74, -34
 min_lat, max_lat = -34, 5
