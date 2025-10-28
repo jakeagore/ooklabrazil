@@ -12,9 +12,9 @@ import numpy as np
 import os
 from shapely.geometry import box
 
-# ------------------------------------ #
-# --- Load Ookla Performance Tiles --- #
-# ------------------------------------ #
+# ----------------------------- #
+# --- Ookla Tile Aquisition --- #
+# ----------------------------- #
 # Ookla URL generator
 def quarter_start(year: int, q: int) -> datetime:
     if not 1 <= q <= 4:
@@ -28,21 +28,15 @@ def get_tile_url(service_type: str, year: int, q: int) -> str:
     url = f"{base_url}/type%3D{service_type}/year%3D{dt:%Y}/quarter%3D{q}/{dt:%Y-%m-%d}_performance_{service_type}_tiles.zip"
     return url
 
-# service type: "mobile" or "fixed", year, quarter
-# Modify these for desired service type and time period
-# Uncomment for downloading ookla tile folders
+# Uncomment and modify these for desired service type and time period
+# service type: "mobile" (mobile cellular) or "fixed" (global fixed broadband)
 # service_type = "fixed"
-# year = 2024
+# year = 2025
 # quarter = 1
 
-# Print URL for downloading
+# Print URL for downloading from the web
 # tile_url = get_tile_url(service_type, year, quarter)
 # print(tile_url)
-
-# Pre-Processing: Filter tiles by Brazil's bounding box
-min_lon, max_lon = -74, -34
-min_lat, max_lat = -34, 5
-brazil_bbox = box(min_lon, min_lat, max_lon, max_lat)
 
 # --------------------------------- #
 # --- Load Brazilian Shapefiles --- #
@@ -63,6 +57,15 @@ STATE_NAME_FIELD = 'NM_UF'
 MUN_ID_FIELD = 'CD_MUN'
 MUN_NAME_FIELD = 'NM_MUN'
 
+# ------------------------------------------------- #
+# --- Join Ookla Tiles and Brazilian Shapefiles --- #
+# ------------------------------------------------- #
+
+# Pre-Processing: Filter tiles by Brazil's bounding box
+min_lon, max_lon = -74, -34
+min_lat, max_lat = -34, 5
+brazil_bbox = box(min_lon, min_lat, max_lon, max_lat)
+
 # Ensure spatial indices are built (may be redundent, GeoPandas uses spatial indices already, but explicitly building them could improve runtime)
 br_states.sindex
 br_municipalities.sindex
@@ -72,9 +75,10 @@ all_state_stats = []
 all_municipality_stats = []
 
 # Loop over service types and quarters
+# Modify for desired service type and time period
 service_types = ["fixed", "mobile"]
-quarters = [1, 2, 3, 4]
-year = 2024 # Modify this for desired year
+quarters = [1, 2, 3] # Modified to 3 quarters for 2025; append a 4th quarter for a fully accessible year
+year = 2025
 
 for service_type in service_types:
     for quarter in quarters:
@@ -88,13 +92,11 @@ for service_type in service_types:
         tiles_filtered = tiles[tiles.geometry.intersects(brazil_bbox)].copy()
         tiles_filtered.sindex
 
-        # --------------------- #
-        # --- Spatial Joins --- #
-        # --------------------- #
+        # Spatial Joins
         # Metrics: 
         # - avg download speed
         # - avg upload speed
-        # - average latency: Use Case: Overall network quality
+        # - average latency
         
         # TODO avg_lat_up_ms & avg_lat_down_ms parquet only, causing problems, resolve later
         # - average latency under load of all tests performed in the tile as measured during the download phase of the test: Use Case: Streaming, web browsing
@@ -114,9 +116,7 @@ for service_type in service_types:
         tiles_in_br_municipalities['avg_u_mbps'] = tiles_in_br_municipalities['avg_u_kbps'] / 1000
         tiles_in_br_municipalities['avg_lat_ms'] = tiles_in_br_municipalities['avg_lat_ms']
         
-        # ---------------------------------------------------- #
-        # --- Aggregate All Metrics with Weighted Averages --- #
-        # ---------------------------------------------------- #
+        # Aggregate All Metrics with Weighted Averages
         # States
         state_stats = (
             tiles_in_br_states.groupby([STATE_ID_FIELD, STATE_NAME_FIELD])
@@ -172,7 +172,7 @@ all_municipality_df = pd.concat(all_municipality_stats, ignore_index=True) if al
 # -------------------------- #
 # --- EXPORT FOR TABLEAU --- #
 # -------------------------- #
-# Set directory where the csv files will go; Change to your prefered location
+# Set directory where the csv files will go; Change to your preferred location
 downloads_path = r"C:\Users\jakea\Downloads"
 
 # Export States
@@ -186,7 +186,7 @@ state_export.columns = [
 ]
 state_export.to_csv(os.path.join(downloads_path, f'brazil_state_connectivity_{year}.csv'), index=False)
 
-# Add state names to municipality data
+# Add state names to municipality data; for establishing a relationship between connections in Tableau
 state_mapping = dict(zip(br_states['CD_UF'], br_states['NM_UF']))
 all_municipality_df['NM_UF'] = all_municipality_df['CD_MUN'].astype(str).str[:2].map(state_mapping)
 
