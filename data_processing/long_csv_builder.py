@@ -1,61 +1,57 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Nov  3 12:47:10 2025
+Created on Mon Nov  3 08:56:23 2025
 
 @author: jakea
 """
 
 import pandas as pd
+import pathlib
 import glob
-import os
 
-# Set Path
-os.chdir(r"C:\Users\jakea\Downloads")
+# --------------------- #
+# --- CONFIGURATION --- #
+# --------------------- #
+DOWNLOADS = pathlib.Path(r"C:\Users\jakea\Downloads")
+OUTPUT_FILE = DOWNLOADS / "brazil_combined_connectivity_2021_2025.csv"
 
-# ------------------ #
-# --- FIND FILES --- #
-# ------------------ #
-muni_files = sorted(glob.glob("Brazil_Municipality_Connectivity_*.csv"))
-state_files = sorted(glob.glob("Brazil_State_Connectivity_*.csv"))
-
-# ---------------------- #
-# --- READ & PROCESS --- #
-# ---------------------- #
-dfs = []
-
-for file in muni_files + state_files:    
-    df = pd.read_csv(file)
-
-    # Add geography level
-    if 'Municipality' in file:
-        df['geography_level'] = 'Municipality'
-    else:
-        df['geography_level'] = 'State'
-        df['municipality_code'] = pd.NA
-        df['municipality_name'] = pd.NA
-
-    # Use 'year' column or extract from filename
-    if 'year' not in df.columns:
-        year = int(file.split('_')[-1].replace('.csv', ''))
-        df['year'] = year
-
-    dfs.append(df)
+# Patterns for the two file families
+MUNI_PATTERN = DOWNLOADS / "brazil_municipality_connectivity_*.csv"
+STATE_PATTERN = DOWNLOADS / "brazil_state_connectivity_*.csv"
 
 # --------------- #
-# --- COMBINE --- #
+# --- HELPERS --- #
 # --------------- #
-full_df = pd.concat(dfs, ignore_index=True)
-
-# Standardize columns
-cols = [
-    'municipality_code', 'municipality_name', 'state_code', 'state_name',
-    'service_type', 'year', 'quarter', 'geography_level',
-    'avg_lat_ms', 'tests', 'avg_d_Mbps', 'avg_u_Mbps'
-]
-full_df = full_df.reindex(columns=cols)
+def read_and_tag(pattern: str, level: str) -> pd.DataFrame:
+    """
+    Read all CSVs matching *pattern*, add geographical_level column,
+    and return a concatenated DataFrame.
+    """
+    dfs = []
+    for f in glob.glob(str(pattern)):
+        df = pd.read_csv(f, dtype=str)          # read everything as string first
+        # Convert numeric columns back to float (except codes/ids)
+        numeric_cols = ["avg_d_Mbps", "avg_u_Mbps", "avg_lat_ms", "tests",
+                        "year", "quarter"]
+        for col in numeric_cols:
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors="coerce")
+        df["geographical_level"] = level
+        dfs.append(df)
+    return pd.concat(dfs, ignore_index=True) if dfs else pd.DataFrame()
 
 # ------------ #
-# --- SAVE --- #
+# --- MAIN --- #
 # ------------ #
-output_file = "brazil_connectivity_long.csv"
-full_df.to_csv(output_file, index=False)
+muni_df = read_and_tag(MUNI_PATTERN, "municipality")
+state_df = read_and_tag(STATE_PATTERN, "state")
+combined = pd.concat([muni_df, state_df], ignore_index=True)
+
+# Re-order columns so geographical_level appears early (optional)
+cols = list(combined.columns)
+cols.remove("geographical_level")
+new_order = ["geographical_level"] + cols
+combined = combined[new_order]
+
+# WRITE MASTER CSV
+combined.to_csv(OUTPUT_FILE, index=False, float_format="%.6f")
